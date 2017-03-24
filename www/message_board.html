@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en" ng-app='app'>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style> 
+        * {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        li {
+            border-bottom: 1px dashed black;
+        }
+
+        a {
+            color: blue;
+            padding-left: 250px;
+            cursor: pointer;
+        }
+    </style>
+    <script src="angular.js"></script>
+    <script>
+        var app = angular.module('app', []);
+        app.controller('show', function ($scope, $http) {
+            $scope.msg = '';
+            $scope.data = [];
+            /*/get*/
+            $http({
+                method: 'GET',
+                url: '/get',
+            }).then(function (res) {
+                console.log(res.data.msg);
+                var arr = res.data.msg;
+                if (!res.data.error) {
+                    angular.forEach(arr, function (v, i) {
+                        $scope.data.push(v);
+                    })
+                }
+            }, function () {
+                alert('连接失败');
+            });
+            /*FUNCTION----add()*/
+            $scope.add = function () {
+                $http({
+                    method: 'GET',
+                    url: '/add',
+                    params: {
+                        msg: $scope.msg
+                    }
+                }).then(function (res) {
+                    console.log(res.data.error);
+                    if (res.data.error) {} else {
+                        console.log($scope.msg);
+                        console.log(res.id);
+
+                        $scope.data.push({
+                            id: res.id,
+                            msg: $scope.msg
+                        });
+                    }
+                }, function () {
+                    alert('连接失败');
+                });
+                // $scope.msg = '';
+            }
+            $scope.del = function (k, index) {
+                console.log(k);
+                console.log(index);
+                // this.dataset(id);
+                $http({
+                    method: 'GET',
+                    url: '/del',
+                    params: {
+                        id: k
+                    }
+                }).then(function (res) {
+                    if (res.data.error) {} else {
+                        alert('删除成功');
+                        $scope.data.splice(index, 1);
+
+                    }
+                }, function () {
+                    alert('连接失败');
+                });
+            }
+        });
+    </script>
+</head>
+
+<body>
+    <div ng-controller="show">
+
+        <input type="text" ng-model="msg">
+        <input type="button" value="submit" ng-click="add()"><br>
+        <ul>
+            <li ng-repeat="(i,v) in data track by $index">{{v.msg}}
+                <a data-id="{{v.id}}" ng-click="del(v.id,i)">删除</a>
+            </li>
+        </ul>
+    </div>
+</body>
+
+</html>
